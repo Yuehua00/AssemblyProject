@@ -19,7 +19,14 @@ INCLUDE Irvine32.inc
 		BYTE "Let the guessing games begin! ", 0dh, 0ah, 0
 	strT BYTE " ",0
 
+	; Printmsg
+	line BYTE "---------------------------------", 0dh, 0ah, 0
+	zeroOutput BYTE "|   \t"
+	blank BYTE "|   "
+
+
 	; data
+	game DWORD 16 DUP (0)
 	ans DWORD 4 DUP(?)
 	input DWORD 4 DUP(?)
 	continue DWORD 1h
@@ -29,6 +36,7 @@ INCLUDE Irvine32.inc
 .code
 main PROC
 	mov edx, OFFSET welcome
+	call print                 ; 測試用，要拿掉
 	call WriteString
 	call Crlf
 	mov eax, 1h
@@ -42,8 +50,7 @@ main PROC
 
 	EndGame:
 		; output end message
-
-	call WaitMsg              
+             
 
 exit
 main ENDP
@@ -81,5 +88,48 @@ creatANS PROC
 	ret
 
 creatANS ENDP
+
+;---------------------------------------------
+print PROC USES esi
+; Print out the interface.
+;---------------------------------------------
+
+	mov ecx, 4
+
+	L1:
+		
+		mov edx, OFFSET line
+		call WriteString
+		call Crlf
+		push ecx
+		mov ecx, 4
+		L2:
+			
+			mov eax, [esi]     ; 有錯
+			cmp eax, 0
+			je isZero
+			push eax
+			mov eax, OFFSET blank
+			call WriteString
+			pop eax
+			call WriteString
+			mov eax, "\t"
+			call WriteString
+			jmp next
+
+		isZero:
+			push eax
+			mov eax, OFFSET zeroOutput
+			call WriteString
+		next:
+			add esi, TYPE DWORD
+		loop L2
+		pop ecx
+	loop L1
+
+		
+		ret
+
+print ENDP
 
 END main
