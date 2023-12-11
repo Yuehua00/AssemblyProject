@@ -66,7 +66,7 @@ void Process(char dir)
     switch(dir)
     {
     case 'w':  // up
-        for(int row = 1; row < Row; row++)   //最上面一行不動
+        for(int row = 1; row < Row; row++)   //最上面一行不動所以從1開始
         {
             for(int crow = row; crow >= 1; --crow)   // 不懂
             {
