@@ -79,6 +79,8 @@ bool CreateNumber()
 int Process(char dir)
 {
     int change = 0;
+    int check[4];
+    for (int i = 0; i < 4; i++) check[i] = 0;
 
     switch(dir)
     {
@@ -97,12 +99,13 @@ int Process(char dir)
                     }
                     else
                     {
-                        if(game[crow-1][col] == game[crow][col])    // ¦X¨Ö
+                        if(game[crow-1][col] == game[crow][col] && check[crow] == 0)    // ¦X¨Ö
                         {
                             game[crow-1][col] *= 2;
                             game[crow][col] = 0;
 
                             change++;
+                            check[crow]++;
                         }
                     }
                 }
@@ -125,12 +128,13 @@ int Process(char dir)
                     }
                     else
                     {
-                        if(game[crow+1][col] == game[crow][col])
+                        if(game[crow+1][col] == game[crow][col] && check[crow] == 0)
                         {
                             game[crow+1][col] *= 2;
                             game[crow][col] = 0;
 
                             change++;
+                            check[crow]++;
                         }
                     }
                 }
@@ -153,12 +157,13 @@ int Process(char dir)
                     }
                     else
                     {
-                        if(game[row][ccol-1] == game[row][ccol])
+                        if(game[row][ccol-1] == game[row][ccol] && check[ccol] == 0)
                         {
                             game[row][ccol-1] *= 2;
                             game[row][ccol] = 0;
 
                             change++;
+                            check[ccol]++;
                         }
                     }
                 }
@@ -180,11 +185,12 @@ int Process(char dir)
                         if (game[row][ccol+1]) change++;
                     }
                     else{
-                        if(game[row][ccol + 1] == game[row][ccol]){
+                        if(game[row][ccol + 1] == game[row][ccol] && check[ccol] == 0){
                             game[row][ccol + 1] *= 2;
                             game[row][ccol] = 0;
 
                             change++;
+                            check[ccol]++;
                         }
                     }
                 }
