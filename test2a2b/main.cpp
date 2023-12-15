@@ -58,14 +58,16 @@ int Game_now()    // 遊戲狀況
 
 bool CreateNumber()
 {
-    int x = 0, y = 0;
+    int x, y;
     int probablity = rand() % 3;    // 先跟她一樣，後面看要不要修改
 
     if (Game_now() == 0) return false;
 
-    while(game[x][y] != 0) {
+    while(true) {
         x = rand() % Row;
         y = rand() % Col;
+
+        if (game[x][y] == 0) break;
     }
 
     if(probablity == 0) game[x][y] = 4;    // 1/3 機率
@@ -74,8 +76,10 @@ bool CreateNumber()
     return true;
 }
 
-void Process(char dir)
+int Process(char dir)
 {
+    int change = 0;
+
     switch(dir)
     {
     case 'w':  // up
@@ -89,6 +93,7 @@ void Process(char dir)
                     {
                         game[crow-1][col] = game[crow][col];
                         game[crow][col] = 0;
+                        if (game[crow-1][col]) change++;
                     }
                     else
                     {
@@ -96,6 +101,8 @@ void Process(char dir)
                         {
                             game[crow-1][col] *= 2;
                             game[crow][col] = 0;
+
+                            change++;
                         }
                     }
                 }
@@ -113,6 +120,8 @@ void Process(char dir)
                     {
                         game[crow+1][col] = game[crow][col];
                         game[crow][col] = 0;
+
+                        if (game[crow+1][col]) change++;
                     }
                     else
                     {
@@ -120,6 +129,8 @@ void Process(char dir)
                         {
                             game[crow+1][col] *= 2;
                             game[crow][col] = 0;
+
+                            change++;
                         }
                     }
                 }
@@ -137,6 +148,8 @@ void Process(char dir)
                     {
                         game[row][ccol-1] = game[row][ccol];
                         game[row][ccol] = 0;
+
+                        if (game[row][ccol-1]) change++;
                     }
                     else
                     {
@@ -144,6 +157,8 @@ void Process(char dir)
                         {
                             game[row][ccol-1] *= 2;
                             game[row][ccol] = 0;
+
+                            change++;
                         }
                     }
                 }
@@ -161,10 +176,15 @@ void Process(char dir)
                     {
                         game[row][ccol + 1] = game[row][ccol];
                         game[row][ccol] = 0;
-                    }else{
+
+                        if (game[row][ccol+1]) change++;
+                    }
+                    else{
                         if(game[row][ccol + 1] == game[row][ccol]){
                             game[row][ccol + 1] *= 2;
                             game[row][ccol] = 0;
+
+                            change++;
                         }
                     }
                 }
@@ -172,6 +192,8 @@ void Process(char dir)
         }
         break;
     }
+
+    return change;
 }
 
 int main()
@@ -191,8 +213,8 @@ int main()
 
         while(gameState == 1) {
             cin >> direction;
-            Process(direction);
-            CreateNumber();
+            if (Process(direction) > 0)
+                CreateNumber();
             print();
             gameState = Game_now();
         }
