@@ -29,35 +29,55 @@ void print()
     cout << border << endl;
 }
 
+int Game_now()    // 遊戲狀況
+{
+    // 檢查是否有上下一樣的數
+    for(int i = 0; i < Row; i++)
+    {
+        for(int j = 0; j < Col; j++)
+        {
+            if (game[i][j] == 2048) {  // 檢查是有有2048
+                return 2;
+                break;
+            }
+
+            if(!game[i][j] || (game[i][j] == game[i][j+1]))
+            {
+                return 1;
+                break;
+            }
+        }
+    }
+    // 檢查左右
+    for(int j = 0; j < Col; j++)
+    {
+        for(int i = 0; i < Row; i++)
+        {
+            if(!game[i][j] || (game[i][j] == game[i+1][j]))
+            {
+                return 1;
+                break;
+            }
+        }
+    }
+    return 0;
+}
+
 bool CreateNumber()
 {
     int x = -1, y = -1;
-    int times = 0;
-    int max_times = Row * Col;
     int probablity = rand() % 3;    // 先跟她一樣，後面看要不要修改
-    while(game[x][y] != 0 && times <= max_times)
-    {
+
+    if (Game_now() == 0) return false;
+
+    while(game[x][y] != 0) {
         x = rand() % Row;
         y = rand() % Col;
-        times++;
     }
 
-    if(times == max_times)
-    {
-        full = true;
-        return false;        // 格子滿了
-    }
-    else
-    {
-        if(probablity == 0)
-        {
-            game[x][y] = 4;    // 1/3 機率
-        }
-        else
-        {
-            game[x][y] = 2;    // 2/3 機率
-        }
-    }
+    if(probablity == 0) game[x][y] = 4;    // 1/3 機率
+    else game[x][y] = 2;    // 2/3 機率
+
     return true;
 }
 
@@ -161,64 +181,42 @@ void Process(char dir)
     }
 }
 
-int Game_now()    // 遊戲狀況
-{
-    for(int i = 0; i < Row; i++)
-    {
-        for(int j = 0; j < Col; j++)
-        {
-            if(!game[i][j] || (game[i][j] == game[i][j+1]))
-            {
-                return 1;
-                break;
-            }
-        }
-    }
-    for(int j = 0; j < Col; j++)
-    {
-        for(int i = 0; i < Row; i++)
-        {
-            if(!game[i][j] || (game[i][j] == game[i+1][j]))
-            {
-                return 1;
-                break;
-            }
-        }
-    }
-    return 0;
-}
-
-
 int main()
 {
+    char play = 'Y';
     srand((unsigned int)time(0));
     CreateNumber();
     CreateNumber();
-    print();
+    print();  // Q只有出現一個數字
     char direction;
-    int gameState = -1;
-    while(true)
+    int gameState = Game_now();
+    while(play == 'Y')
     {
-        while(cin >> direction)
+        resetGame();
+
+        while(gameState == 1)
         {
+            cin >> direction;
+            Process(direction);
+            CreateNumber();
+            print();
             gameState = Game_now();
-            //if(full) break;
-            if(gameState == 1)
-            {
-                Process(direction);
-                CreateNumber();
-                print();
-                break;
-            }
-            else if(gameState == 0)
-            {
-                print();
-                cout <<"You lose!" << endl;
-                break;
-            }
         }
 
+        if(gameState == 0)
+        {
+            print();
+            cout <<"You lose!" << endl;
+        }
+        else {
+            print();
+            cout << "You win!" << endl;
+        }
+
+        cout << "Do you want to play again? Y/N" << endl;
+        cin >> play;
     }
+    cout << "Thanks for playing!" << endl;
 
 
     return 0;
