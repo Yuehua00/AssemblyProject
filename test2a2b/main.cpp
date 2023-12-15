@@ -10,7 +10,9 @@ bool full = false;
 
 void resetGame()
 {
-    game[SIZE][SIZE] = {0};
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
+            game[i][j] = 0;
 }
 
 void print()
@@ -31,41 +33,32 @@ void print()
 
 int Game_now()    // 遊戲狀況
 {
-    // 檢查是否有上下一樣的數
-    for(int i = 0; i < Row; i++)
-    {
-        for(int j = 0; j < Col; j++)
-        {
-            if (game[i][j] == 2048) {  // 檢查是有有2048
-                return 2;
-                break;
-            }
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (game[i][j] == 2048) return 2;
+        }
+    }
 
-            if(!game[i][j] || (game[i][j] == game[i][j+1]))
-            {
-                return 1;
-                break;
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (!game[i][j]) return 1;
+            else {
+                if (i + 1 < SIZE) {
+                    if (game[i][j] == game[i+1][j]) return 1;
+                }
+                else if (j + 1 < SIZE) {
+                    if (game[i][j] == game[i][j+1]) return 1;
+                }
             }
         }
     }
-    // 檢查左右
-    for(int j = 0; j < Col; j++)
-    {
-        for(int i = 0; i < Row; i++)
-        {
-            if(!game[i][j] || (game[i][j] == game[i+1][j]))
-            {
-                return 1;
-                break;
-            }
-        }
-    }
+
     return 0;
 }
 
 bool CreateNumber()
 {
-    int x = -1, y = -1;
+    int x = 0, y = 0;
     int probablity = rand() % 3;    // 先跟她一樣，後面看要不要修改
 
     if (Game_now() == 0) return false;
@@ -185,17 +178,18 @@ int main()
 {
     char play = 'Y';
     srand((unsigned int)time(0));
-    CreateNumber();
-    CreateNumber();
-    print();  // Q只有出現一個數字
     char direction;
-    int gameState = Game_now();
+    int gameState;
+
     while(play == 'Y')
     {
         resetGame();
+        CreateNumber();
+        CreateNumber();
+        print();  // Q只有出現一個數字
+        gameState = Game_now();
 
-        while(gameState == 1)
-        {
+        while(gameState == 1) {
             cin >> direction;
             Process(direction);
             CreateNumber();
@@ -204,14 +198,9 @@ int main()
         }
 
         if(gameState == 0)
-        {
-            print();
             cout <<"You lose!" << endl;
-        }
-        else {
-            print();
+        else
             cout << "You win!" << endl;
-        }
 
         cout << "Do you want to play again? Y/N" << endl;
         cin >> play;
