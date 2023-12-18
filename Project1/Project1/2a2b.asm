@@ -19,13 +19,20 @@ INCLUDE Irvine32.inc
 
 	; Printmsg
 	line BYTE "---------------------------------", 0dh, 0ah, 0
-	blank BYTE "|   ", 0
+	blank7 BYTE "|       ", 0
+	blank6 BYTE "|      ", 0
+	blank5 BYTE "|     ", 0
+	blank4 BYTE "|    ", 0
+	blank3 BYTE "|   ", 0
 
 
 	; data
-	game DWORD 16 DUP (0)
+	game DWORD 15 DUP (0)
+	check DWORD 4 DUP (0)
+	change DWORD 0
 	continue DWORD 1h
 	direction BYTE 'w', 's', 'a', 'd'
+	input BYTE ?
 
 	row DWORD ?
 	crow DWORD ?
@@ -54,18 +61,21 @@ main PROC
 		call newNum
 		call newNum
 		call print
+		
 
-		input:
+		input00:
 			mov wrongInput, 0
 			mov eax, 0
 			mov cnt, 0
 			call ReadChar        ; 讀入不顯示
+			mov input, al
 			call writechar       ; 顯示剛剛輸入的
-			call newNum
+			
 			call crlf
 		
 		mov esi, OFFSET direction
 		mov edx, 5
+		mov al, input
 		L1:
 			mov bl, [esi]
 			inc cnt       ; 記錄哪個方向
@@ -101,27 +111,59 @@ main PROC
 			 jmp next
 		
 		next:
+			call newNum
 			cmp wrongInput, 0
 			je wrong
 			call print
-			jmp Input
+			jmp Input00
 		wrong:
 			mov edx, OFFSET InputWrong
 			call WriteString
-			jmp Input
+			jmp Input00
 		
 	EndGame:
 		; output end message
              
-
+	invoke ExitProcess, 0
 exit
 main ENDP
+
+;---------------------------------------------------
+resetGame PROC
+; 
+;---------------------------------------------------
+	LOCAL i : DWORD
+	LOCAL j : DWORD
+
+	mov i, 0
+	L1:
+		mov esi, OFFSET game
+		mov eax, i
+		shl eax, 4
+		add esi, eax
+		mov j, 0
+		L2:
+			add esi, 4
+			mov ebx, 0
+			mov [esi], ebx
+			inc j
+			mov eax, j
+			cmp eax, 4
+			jl L2
+		inc i
+		mov eax, i
+		cmp eax, 4
+		jl L1
+
+	ret
+resetGame ENDP
+
 ;----------------------------------------------------
 creatNUM PROC
 ; Creat random number(2 || 4) to game, saving in EAX.
 ;-----------------------------------------------------
 
-	call Random32
+	; call Random32
 	; call WriteDec                  ; 用來看亂數本人
 	mov edx, 0   
 	div ecx                         
@@ -283,14 +325,42 @@ print PROC USES esi
 		call WriteString
 		mov ecx, 4
 		L2:
-			mov edx, OFFSET blank         ; 輸出對齊問題  '\t'不能用
-			call WriteString
+			; mov edx, OFFSET blank         ; 輸出對齊問題  '\t'不能用
+			; call WriteString
 			mov eax, [esi]
-			cmp eax, 0
-			je next
-			call WriteDec
+			cmp eax, 1000
+			jae blk3
+			cmp eax, 100
+			jae blk4
+			cmp eax, 10
+			jae blk5
+			cmp eax, 1
+			jae blk6
+			mov edx, OFFSET blank7
+			call WriteString
+			jmp next2
+
+			blk6:
+				mov edx, OFFSET blank6
+				call WriteString
+				jmp next
+			blk5:
+				mov edx, OFFSET blank5
+				call WriteString
+				jmp next
+			blk4:
+				mov edx, OFFSET blank4
+				call WriteString
+				jmp next
+			blk3:
+				mov edx, OFFSET blank3
+				call WriteString
+				jmp next
+			
 
 			next:
+				call WriteDec
+			next2:
 				add esi, TYPE DWORD
 		loop L2
 		pop ecx
@@ -310,6 +380,8 @@ print ENDP
 Up PROC
 ; Move up.
 ;----------------------------------------------------
+	; call resetCheck
+	; mov change, 0
 	mov row, 1                  ; int row = 1
 	forRow:
 		mov eax, row
@@ -333,7 +405,11 @@ Up PROC
 				mov [esi], eax
 				mov eax, 0
 				mov [esi+16], eax
-				; if (game[crow-1][col]) change++;
+				; mov edx, 0
+				; cmp [esi], edx
+				; je next
+				; inc change
+				; -if (game[crow-1][col] != 0) change++;
 				jmp next
 
 				notZero:
@@ -341,12 +417,31 @@ Up PROC
 					mov ebx, [esi+16]
 					cmp eax, ebx
 					jne next
-					; check[crow] == 0
+
+					; mov ebp, OFFSET check
+					; mov edx, crow
+					; shl edx, 2
+					; add ebp, edx
+					; mov edx, 0
+					; cmp [ebp], edx
+					; jne next
+					; -check[crow] == 0
+
 					shl eax, 1
 					mov [esi], eax
 					mov ebx, 0
 					mov [esi+16], ebx
+					; inc change
 					; change++;
+					; push esi
+					; mov esi, OFFSET check
+					; mov edx, crow
+					; shl edx, 2
+					; add esi, edx
+					; mov edx, [esi]
+					; inc edx
+					; mov [esi], edx
+					; pop esi
 					; check[crow]++;
 				next:
 					mov esi, OFFSET game
@@ -369,6 +464,8 @@ Up ENDP
 Down PROC
 ; Move down.
 ;-----------------------------------------------------
+	; call resetCheck
+	; mov change, 0
 	mov row, 2                    ; int row = Row - 2 = 2
 	forRow:
 		mov eax, row            
@@ -390,6 +487,9 @@ Down PROC
 				mov [esi], eax
 				mov eax, 0
 				mov [esi-16], eax
+				; cmp [esi], eax
+				; je next
+				; inc change
 				; if (game[crow+1][col]) change++
 				jmp next
 
@@ -398,12 +498,31 @@ Down PROC
 					mov ebx, [esi-16]
 					cmp eax, ebx
 					jne next
+
+					; mov ebp, OFFSET check
+					; mov edx, crow
+					; shl edx, 2
+					; add ebp, edx
+					; mov edx, 0
+					; cmp [ebp], edx
+					; jne next
 					; check[crow] == 0
+
 					shl eax, 1
 					mov [esi], eax
 					mov ebx, 0
 					mov [esi-16], ebx
-					; change++
+					; inc change
+					; change++;
+					; push esi
+					; mov esi, OFFSET check
+					; mov edx, crow
+					; shl edx, 2
+					; add esi, edx
+					; mov edx, [esi]
+					; inc edx
+					; mov [esi], edx
+					; pop esi
 					; check[crow]++
 				next:
 					mov esi, OFFSET game
@@ -427,6 +546,8 @@ Down ENDP
 Left PROC
 ; Move left.
 ;---------------------------------------------------
+	; call resetCheck
+	; mov change, 0
 	mov col, 1                    ; int col = 1
 	forCol:
 		mov eax, col            
@@ -447,6 +568,9 @@ Left PROC
 				mov [esi-4], eax
 				mov eax, 0
 				mov [esi], eax
+				; cmp [esi-4], eax
+				; je next
+				; inc change
 				; if (game[row][ccol-1]) change++
 				jmp next
 
@@ -455,12 +579,31 @@ Left PROC
 					mov ebx, [esi]
 					cmp eax, ebx
 					jne next
+
+					; mov ebp, OFFSET check
+					; mov edx, ccol
+					; shl edx, 2
+					; add ebp, edx
+					; mov edx, 0
+					; cmp [ebp], edx
+					; jne next
 					; check[ccol] == 0
+
 					shl eax, 1
 					mov [esi-4], eax
 					mov ebx, 0
 					mov [esi], ebx
-					; change++
+					; inc change
+					; change++;
+					; push esi
+					; mov esi, OFFSET check
+					; mov edx, ccol
+					; shl edx, 2
+					; add esi, edx
+					; mov edx, [esi]
+					; inc edx
+					; mov [esi], edx
+					; pop esi
 					; check[ccol]++
 				next:
 					mov esi, OFFSET game
@@ -484,6 +627,8 @@ Left ENDP
 Right PROC
 ; Move right.
 ;---------------------------------------------------
+	; call resetCheck
+	; mov change, 0
 	mov col, 2                    ; int col = Col - 2 = 2
 	forCol:
 		mov eax, col            
@@ -491,6 +636,7 @@ Right PROC
 		forCcol:
 			mov row, 0            ; int row = 0
 			forRow:
+				
 				mov eax, row
 				shl eax, 4
 				add esi, eax
@@ -504,6 +650,9 @@ Right PROC
 				mov [esi+4], eax
 				mov eax, 0
 				mov [esi], eax
+				; cmp [esi+4], eax
+				; je next
+				; inc change
 				; if (game[row][ccol+1]) change++
 				jmp next
 
@@ -512,12 +661,31 @@ Right PROC
 					mov ebx, [esi]
 					cmp eax, ebx
 					jne next
+
+					; mov ebp, OFFSET check
+					; mov edx, ccol
+					; shl edx, 2
+					; add ebp, edx
+					; mov edx, 0
+					; cmp [ebp], edx
+					; jne next
 					; check[ccol] == 0
+
 					shl eax, 1
 					mov [esi+4], eax
 					mov ebx, 0
 					mov [esi], ebx
-					; change++
+					; inc change
+					; change++;
+					; push esi
+					; mov esi, OFFSET check
+					; mov edx, ccol
+					; shl edx, 2
+					; add esi, edx
+					; mov edx, [esi]
+					; inc edx
+					; mov [esi], edx
+					; pop esi
 					; check[ccol]++
 				next:
 					mov esi, OFFSET game
@@ -536,7 +704,20 @@ Right PROC
 		jge forCol
 	ret
 Right ENDP
-	
+
+;---------------------------------------------------------
+resetCheck PROC
+; Reset check array.
+;---------------------------------------------------------
+	mov ecx, 4
+	mov esi, OFFSET check
+	mov ebx, 0
+	L1:
+		mov [esi], ebx
+		add esi, 4
+		loop L1
+	ret
+resetCheck ENDP
 
 END main
 
