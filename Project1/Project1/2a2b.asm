@@ -60,7 +60,7 @@ main PROC
 		call resetGame
 		mov eax, 1
 		inc startGame
-		cmp startGame, eax          ; 判斷是否為第一局
+		cmp startGame, eax          ; 判斷是否為第一局，第一局不詢問是否繼續
 		je StartGameIt
 		mov eax, 0
 		call Readchar
@@ -125,11 +125,11 @@ main PROC
 
 		move_right: cmp eax, 4
 			 call Right
-			 mov wrongInput, 1
+			 mov wrongInput, 1      ; 表示正確輸入
 			 jmp next
 		
 		next:
-			cmp ebx, 0
+			cmp ebx, 0              ; 移動後回傳是否進行合併的結果存於 ebx ， ebx = 0 表示沒有進行合併
 			je wrong
 			call newNum
 			call Game_now
@@ -138,22 +138,19 @@ main PROC
 			je wrong
 			call print
 			jmp CheckNow
-		wrong:
+		wrong:                      ; 輸入錯誤則要求充新輸入
 			mov edx, OFFSET InputWrong
 			call WriteString
 			jmp Input00
 		
 	CheckNow:
-		; mov eax, gameState
-		; call writedec
-		; call crlf
-		mov ebx, 2           ; gameState = 2 : 2048
+		mov ebx, 2            ; gameState = 2 : 2048
 		cmp gameState, ebx
 		je WinGame
-		mov ebx, 0           ; gameState = 0 : 無法移動
+		mov ebx, 0            ; gameState = 0 : 無法移動
 		cmp gameState, ebx
 		jne Input00
-		mov edx, OFFSET Lose ; 輸出 lose
+		mov edx, OFFSET Lose  ; 輸出 lose
 		call WriteString
 		jmp NextGame          ; 跳至是否繼續遊玩
 
@@ -162,7 +159,7 @@ main PROC
 		call WriteString
 	
 	NextGame:
-		mov edx, OFFSET Continue
+		mov edx, OFFSET Continue   ; 詢問是否下一局
 		call WriteString
 		jmp NewGame
 
@@ -181,18 +178,18 @@ resetGame PROC
 	LOCAL i : DWORD
 	LOCAL j : DWORD
 
-	mov i, 0
+	mov i, 0                       ; 紀錄 Row
 	L1:
-		mov esi, OFFSET game
-		mov eax, i
-		shl eax, 4
-		add esi, eax
-		mov j, 0
+		mov esi, OFFSET game        
+		mov eax, i      
+		shl eax, 4                 ; i *= 16
+		add esi, eax               ; esi 指向 game 第 i Row 的開頭
+		mov j, 0                   ; 紀錄 Column
 		L2:
 			mov ebx, 0
-			mov [esi], ebx
+			mov [esi], ebx         ; 將每一格清空為 0
 			inc j
-			add esi, 4
+			add esi, 4             ; eai 指向下一個 ( 因為是 DWORD 所以 +4)
 			mov eax, j
 			cmp eax, 4
 			jl L2
@@ -210,7 +207,6 @@ creatNUM PROC
 ;-----------------------------------------------------
 
 	call Random32
-	; call WriteDec                  ; 用來看亂數本人
 	mov edx, 0   
 	div ecx                         
 	cmp edx, 0                       ; 餘數在edx
@@ -232,7 +228,6 @@ creatPOS PROC
 ;-----------------------------------------------------
 
 	call Random32
-	; call WriteDec                  ; 用來看亂數本人
 	mov edx, 0                        
 	idiv ecx                         
 	mov eax, edx
