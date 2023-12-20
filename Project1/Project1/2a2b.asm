@@ -303,7 +303,7 @@ Game_now PROC
 	jmp Li2
 
 	Find2048:
-		mov eax, 2
+		mov eax, 2                ; 找到 2048 
 		jmp quit
 
 	Li2:
@@ -317,7 +317,7 @@ Game_now PROC
 			cmp eax, 0
 			je Zero
 
-			checki:
+			checki:               ; 判斷 右邊 的格子是否相同數字 = 是否可以進行合併
 				mov eax, i
 				inc eax
 				cmp eax, 4
@@ -328,7 +328,7 @@ Game_now PROC
 				jne checkj
 				mov eax, 1
 				jmp quit
-			checkj:
+			checkj:               ; 判斷 下面 的格子是否相同數字 = 是否可以進行合併
 				mov eax, j
 				inc eax
 				cmp eax, 4
@@ -352,7 +352,7 @@ Game_now PROC
 	mov eax, 0
 	jmp quit
 	
-	Zero:                    ; 陣列有 0 
+	Zero:                    ; 陣列有 0 = 遊戲可以繼續
 		mov eax, 1
 	quit:
 
@@ -372,7 +372,7 @@ print PROC USES esi
 		call WriteString
 		mov ecx, 4
 		L2:
-			mov eax, [esi]
+			mov eax, [esi]         ; 確定數字長度，尋找輸出對應空白格數
 			cmp eax, 1000
 			jae blk3
 			cmp eax, 100
@@ -467,17 +467,17 @@ Up PROC
 					inc change
 				next:
 					mov esi, OFFSET game
-				inc col
-				mov eax, col
-				cmp eax, 4
+				inc col                        ; col++
+				mov eax, col              
+				cmp eax, 4                     ; col < 4
 				jl forCol
-			dec crow
+			dec crow                           ; crow--
 			mov eax, crow
-			cmp eax, 1
+			cmp eax, 1                         ; crow >= 1
 			jge forCrow
-		inc row
+		inc row                                ; row++
 		mov eax, row
-		cmp eax, 4
+		cmp eax, 4                             ; row < Row = 4
 		jl forRow
 		mov ebx, change
 	ret
@@ -529,17 +529,17 @@ Down PROC
 
 				next:
 					mov esi, OFFSET game
-				inc col
+				inc col                    ; col++
 				mov eax, col
-				cmp eax, 4
+				cmp eax, 4                 ; col < Col = 4
 				jl forCol
-			inc crow
+			inc crow                       ; crow++
 			mov eax, crow
-			cmp eax, 3
+			cmp eax, 3                     ; crow < Row-1 = 3
 			jl forCrow
-		dec row
+		dec row                            ; row--
 		mov eax, row
-		cmp eax, 0
+		cmp eax, 0                         ; row >= 0
 		jge forRow
 		mov ebx, change
 	ret
@@ -590,18 +590,17 @@ Left PROC
 					inc change
 				next:
 					mov esi, OFFSET game
-				inc row
+				inc row                       ; row++
 				mov eax, row
-				cmp eax, 4
+				cmp eax, 4                    ; row < Row = 4
 				jl forRow
-			; call print
-			dec ccol
+			dec ccol                          ; ccol--
 			mov eax, ccol
-			cmp eax, 1
+			cmp eax, 1                        ; ccol >= 1
 			jge forCcol
-		inc col
+		inc col                               ; col++
 		mov eax, col
-		cmp eax, 4
+		cmp eax, 4                            ; col < Col = 4
 		jl forCol
 		mov ebx, change
 	ret
@@ -652,18 +651,17 @@ Right PROC
 					inc change
 				next:
 					mov esi, OFFSET game
-				inc row
+				inc row                     ; row++
 				mov eax, row
-				cmp eax, 4
+				cmp eax, 4                  ; row < Row = 4
 				jl forRow
-			; call print
-			inc ccol
+			inc ccol                        ; ccol++
 			mov eax, ccol
-			cmp eax, 2
+			cmp eax, 2                      ; ccol <= Col - 2 = 2
 			jle forCcol
-		dec col
+		dec col                             ; col--
 		mov eax, col
-		cmp eax, 0
+		cmp eax, 0                          ; col >= 0
 		jge forCol
 		mov ebx, change
 	ret
