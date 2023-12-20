@@ -1,3 +1,6 @@
+// 411262207 é™³æ€¡ä¼¶
+// 411262283 é»ƒæœˆè¯
+
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -5,15 +8,17 @@ using namespace std;
 #define border "-------------------------------------"
 
 int game[SIZE][SIZE];
-int Row = 4, Col = 4;  // ¥i¥H¥H¿é¤J§ó§ï
+int Row = 4, Col = 4;  // å¯ä»¥ä»¥è¼¸å…¥æ›´æ”¹
 bool full = false;
 
+// é‡åˆ¶éŠæˆ²
 void resetGame() {
     for (int i = 0; i < SIZE; i++)
         for (int j = 0; j < SIZE; j++)
             game[i][j] = 0;
 }
 
+// è¼¸å‡ºéŠæˆ²ç•«é¢
 void print() {
     for (int i = 0; i < SIZE; i++) {
         cout << border << endl;
@@ -27,7 +32,8 @@ void print() {
     cout << border << endl;
 }
 
-int Game_now() {    // ¹CÀ¸ª¬ªp
+// åˆ¤æ–·éŠæˆ²ç‹€æ³ï¼Œ1 ç‚ºéŠæˆ²ç¹¼çºŒï¼Œ0 ç‚ºéŠæˆ²å¤±æ•—ï¼Œ2 ç‚ºéŠæˆ²å‹åˆ©
+int Game_now() {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
             if (game[i][j] == 2048) return 2;
@@ -51,9 +57,10 @@ int Game_now() {    // ¹CÀ¸ª¬ªp
     return 0;
 }
 
+// éš¨æ©Ÿç”Ÿæˆæ•¸å­—
 bool CreateNumber() {
     int x, y;
-    int probablity = rand() % 3;    // ¥ı¸ò¦o¤@¼Ë¡A«á­±¬İ­n¤£­n­×§ï
+    int probablity = rand() % 3;
 
     if (Game_now() == 0) return false;
 
@@ -64,12 +71,13 @@ bool CreateNumber() {
         if (game[x][y] == 0) break;
     }
 
-    if(probablity == 0) game[x][y] = 4;    // 1/3 ¾÷²v
-    else game[x][y] = 2;    // 2/3 ¾÷²v
+    if(probablity == 0) game[x][y] = 4;    // 1/3 æ©Ÿç‡
+    else game[x][y] = 2;    // 2/3 æ©Ÿç‡
 
     return true;
 }
 
+// æ ¹æ“šç©å®¶è¼¸å…¥æ–¹å‘ç§»å‹•ï¼Œ0 ç‚ºè©²æ–¹å‘æ²’æœ‰å¯ä»¥ç§»å‹•æˆ–åˆä½µçš„æ•¸
 int Process(char dir) {
     int change = 0;
     int check[4];
@@ -77,17 +85,17 @@ int Process(char dir) {
 
     switch(dir) {
     case 'w':  // up
-        for(int row = 1; row < Row; row++) {   //³Ì¤W­±¤@¦æ¤£°Ê©Ò¥H±q1¶}©l
-            for(int crow = row; crow >= 1; --crow) {   // ¤£À´
+        for(int row = 1; row < Row; row++) {   //æœ€ä¸Šé¢ä¸€è¡Œä¸å‹•æ‰€ä»¥å¾1é–‹å§‹
+            for(int crow = row; crow >= 1; --crow) {   // ä¸æ‡‚
                 for(int col = 0; col < Col; col++) {
-                    if(game[crow-1][col] == 0) {          // ¤W¤@±Æ¬°ªÅ
+                    if(game[crow-1][col] == 0) {          // ä¸Šä¸€æ’ç‚ºç©º
                         game[crow-1][col] = game[crow][col];
                         game[crow][col] = 0;
 
                         if (game[crow-1][col]) change++;
                     }
                     else {
-                        if(game[crow-1][col] == game[crow][col] && check[crow] == 0) {    // ¦X¨Ö
+                        if(game[crow-1][col] == game[crow][col] && check[crow] == 0) {    // åˆä½µ
                             game[crow-1][col] *= 2;
                             game[crow][col] = 0;
 
@@ -101,7 +109,7 @@ int Process(char dir) {
         break;
 
     case 's':  // down
-        for(int row = Row-2; row >= 0; row--) {    //³Ì¤U­±¤@¦æ¤£°Ê
+        for(int row = Row-2; row >= 0; row--) {    //æœ€ä¸‹é¢ä¸€è¡Œä¸å‹•
             for(int crow = row; crow < Row-1; crow++) {
                 for(int col = 0; col < Col; col++) {
                     if(game[crow+1][col] == 0) {
@@ -177,7 +185,7 @@ int Process(char dir) {
 }
 
 int main() {
-    // ¿é¥X¶}©l°T®§
+    // è¼¸å‡ºé–‹å§‹è¨Šæ¯
     cout << "Welcome to the world of 2048! ; )" << endl << endl;
     cout << "Ready for some blocky adventures?" << endl;
     cout << "Use 'w' to make blocks ascend like magic!" << endl;
@@ -195,7 +203,7 @@ int main() {
         resetGame();
         CreateNumber();
         CreateNumber();
-        print();  // Q¥u¦³¥X²{¤@­Ó¼Æ¦r
+        print();  // Qåªæœ‰å‡ºç¾ä¸€å€‹æ•¸å­—
         gameState = Game_now();
 
         while(gameState == 1) {
